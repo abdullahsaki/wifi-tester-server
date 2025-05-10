@@ -1,6 +1,10 @@
-Django>=4.2.0
-rclpy>=3.0.0
-geometry_msgs>=3.0.0
+Django==4.2.0
+rclpy==3.0.0
+geometry_msgs==3.0.0
 numpy==1.24.0
 opencv-python-headless==4.8.0.76
-pillow 
+pillow==10.0.0
+python-dotenv==1.0.0
+django-cors-headers==4.3.0
+channels==4.0.0
+daphne==4.0.0 
