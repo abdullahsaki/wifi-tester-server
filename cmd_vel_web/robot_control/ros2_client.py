@@ -129,9 +129,4 @@ def init_ros2():
         if ros2_manager.initialize():
             ros2_client = ros2_manager.client
             return True
-    return False
-
-
-def get_position():
-    """Robot pozisyonunu döndürür."""
-    return ros2_manager.get_position() 
+    return False 

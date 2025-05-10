@@ -73,8 +73,6 @@ http://localhost:8000
   - Maksimum Açısal Hız: 1.82 rad/s
 
 
-
 ## Lisans
 
 Bu proje MIT lisansı altında lisanslanmıştır. Daha fazla bilgi için `LICENSE` dosyasına bakın.
-

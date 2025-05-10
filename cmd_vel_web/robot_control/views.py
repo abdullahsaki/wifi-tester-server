@@ -141,6 +141,7 @@ def send_command(request):
                         robot_controller.LIN_VEL_STEP_SIZE
                     )
                 )
+                robot_controller.target_angular_z = 0.0
             elif command == 'backward':
                 robot_controller.target_linear_x = (
                     robot_controller.check_linear_limit_velocity(
@@ -148,6 +149,7 @@ def send_command(request):
                         robot_controller.LIN_VEL_STEP_SIZE
                     )
                 )
+                robot_controller.target_angular_z = 0.0
             elif command == 'left':
                 robot_controller.target_angular_z = (
                     robot_controller.check_angular_limit_velocity(
@@ -155,6 +157,7 @@ def send_command(request):
                         robot_controller.ANG_VEL_STEP_SIZE
                     )
                 )
+                robot_controller.target_linear_x = 0.0
             elif command == 'right':
                 robot_controller.target_angular_z = (
                     robot_controller.check_angular_limit_velocity(
@@ -162,6 +165,7 @@ def send_command(request):
                         robot_controller.ANG_VEL_STEP_SIZE
                     )
                 )
+                robot_controller.target_linear_x = 0.0
             elif command == 'stop':
                 robot_controller.target_linear_x = 0.0
                 robot_controller.target_angular_z = 0.0
