@@ -1,0 +1,4 @@
+# sanal ortam
+venv/
+.venv/
+env/
