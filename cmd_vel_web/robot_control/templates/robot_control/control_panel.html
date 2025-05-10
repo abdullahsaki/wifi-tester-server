@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROBOT K</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            width: 99%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .control-panel button {
+            padding: 12px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 13px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .control-panel button:hover {
+            background-color: #1d5b85;
+        }
+        #forward-btn {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        #left-btn {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        #stop-btn {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: #752820;
+        }
+        #stop-btn:hover {
+            background-color: #4e1913;
+        }
+        #right-btn {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        #backward-btn {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        #position {
+            margin: 20px 0;
+            padding: 12px;
+            background-color: #f8f9fa;
+            text-align: center;
+            border-radius: 2px;
+            color: #34495e;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 8px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ROBOT KONTROL</h1>
+    
+    <div class="control-panel">
+        <button id="forward-btn" onclick="sendCommand('move/forward/')">İleri</button>
+        <button id="left-btn" onclick="sendCommand('turn/left/')">Sola</button>
+        <button id="stop-btn" onclick="sendCommand('stop/')">Durdur</button>
+        <button id="right-btn" onclick="sendCommand('turn/right/')">Sağa</button>
+        <button id="backward-btn" onclick="sendCommand('move/backward/')">Geri</button>
+    </div>
+
+    <div id="position">Konum: Yükleniyor...</div>
+    <div id="status"></div>
+
+    <script>
+        function handleResponse(response) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            }
+            throw new TypeError('Response was not JSON');
+        }
+
+        function sendCommand(endpoint) {
+            document.getElementById('status').textContent = 'Komut gönderiliyor...';
+
+            fetch(`/robot/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1]
+                }
+            })
+            .then(handleResponse)
+            .then(data => {
+                document.getElementById('status').textContent = data.message;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('status').textContent = 'Hata: Sunucu ile iletişim kurulamadı';
+            });
+        }
+
+        function updatePosition() {
+            fetch('/robot/position/')
+            .then(handleResponse)
+            .then(data => {
+                if (data.status === 'error') {
+                    document.getElementById('position').textContent = 'Hata: ' + data.message;
+                } else {
+                    const pos = data.position;
+                    document.getElementById('position').textContent = 
+                        `Konum: X: ${pos.x.toFixed(2)}, Y: ${pos.y.toFixed(2)}, Z: ${pos.z.toFixed(2)}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('position').textContent = 'Konum bilgisi alınamadı';
+            });
+        }
+
+        setInterval(updatePosition, 1000);
+    </script>
+</body>
+</html> 
