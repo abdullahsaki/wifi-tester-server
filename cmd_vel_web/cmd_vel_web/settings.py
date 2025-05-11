@@ -168,3 +168,65 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
+
+# Logging settings
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'root': {
+        'handlers': ['null'],
+        'level': 'CRITICAL',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'django.request': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'django.server': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'django.db.backends': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'django.template': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'django.security': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'django.utils.autoreload': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'RobotControl': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        },
+        'ROS2Client': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'CRITICAL',
+        }
+    },
+}

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -5,25 +6,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robot Kontrol Arayüzü</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --tt-blue: #003366;
+            --tt-dark-blue: #002244;
+            --tt-gray: #ffffff;
+            --tt-dark-gray: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--tt-dark-gray);
+            background-color: #ffffff;
+        }
+
+        .navbar {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #eee;
+        }
+
+        .btn-primary {
+            background-color: var(--tt-blue);
+            border-color: var(--tt-blue);
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--tt-dark-blue);
+            border-color: var(--tt-dark-blue);
+        }
+
+        .btn-danger {
+            background-color: var(--tt-dark-gray);
+            border-color: var(--tt-dark-gray);
+        }
+
+        .btn-danger:hover {
+            background-color: #1a1a1a;
+            border-color: #1a1a1a;
+        }
+
+        .card {
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+        }
+
+        .card-title {
+            color: var(--tt-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .nav-link {
+            color: var(--tt-dark-gray) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--tt-blue) !important;
+            background-color: rgba(0, 51, 102, 0.1);
+            border-radius: 4px;
+        }
+
         .content-section {
             display: none;
+            padding: 20px 0;
+            background-color: #ffffff;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+
         .active-section {
             display: block;
+            opacity: 1;
         }
+
         .camera-feed {
             max-width: 100%;
             height: auto;
-            border: 1px solid #ddd;
             border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .form-control, .form-select {
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #ffffff;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--tt-blue);
+            box-shadow: none;
+        }
+
+        .text-muted {
+            color: #666 !important;
+        }
+
+        .form-label {
+            text-align: center;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-3 {
+            text-align: center;
+        }
+
+        .lidar-marker {
+            font-size: 12px;
+            padding: 2px 4px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Robot Kontrol</a>
+            <a class="navbar-brand" href="{% url 'robot_control:home' %}">
+                <img src="{% static 'robot_control/images/ttkom_logo.svg' %}" alt="TTKOM Logo" height="40" class="d-inline-block align-text-top">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -33,7 +149,7 @@
                         <a class="nav-link active" href="#" data-section="home">Ana Sayfa</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-section="teleop">Uzaktan Kontrol</a>
+                        <a class="nav-link" href="#" data-section="teleop">Manuel Kontrol</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-section="raw-data">Ham Veri</a>
@@ -52,75 +168,152 @@
     <div class="container mt-4">
         <!-- Ana Sayfa Bölümü -->
         <div id="home" class="content-section active-section">
-            <div class="row">
-                <div class="col-md-6">
-                    <h2>Modem WiFi Sinyal Kalitesi Testi</h2>
-                    <form id="testForm">
-                        <div class="mb-3">
-                            <label for="modemBrand" class="form-label">Modem Markası</label>
-                            <select class="form-select" id="modemBrand">
-                                <option value="">Marka Seçin</option>
-                                <option value="tp-link">TP-Link</option>
-                                <option value="asus">ASUS</option>
-                                <option value="netgear">Netgear</option>
-                            </select>
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Robot Durumu</h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-battery-three-quarters fa-2x mb-2" style="color: var(--tt-blue);"></i>
+                                        <h6>Pil Durumu</h6>
+                                        <p id="batteryStatus">Yükleniyor...</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-wifi fa-2x mb-2" style="color: var(--tt-blue);"></i>
+                                        <h6>WiFi Sinyali</h6>
+                                        <p id="wifiStatus">Yükleniyor...</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-microchip fa-2x mb-2" style="color: var(--tt-blue);"></i>
+                                        <h6>Robot Durumu</h6>
+                                        <p id="robotStatus">Yükleniyor...</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="modemModel" class="form-label">Modem Modeli</label>
-                            <select class="form-select" id="modemModel">
-                                <option value="">Model Seçin</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="firmware" class="form-label">Firmware Versiyonu</label>
-                            <input type="text" class="form-control" id="firmware">
-                        </div>
-                        <div class="mb-3">
-                            <label for="testType" class="form-label">Test Türü</label>
-                            <select class="form-select" id="testType">
-                                <option value="signal-strength">Sinyal Gücü</option>
-                                <option value="connection-stability">Bağlantı Kararlılığı</option>
-                                <option value="throughput">Veri Aktarım Hızı</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Testi Başlat</button>
-                    </form>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h3>Kamera Görüntüsü</h3>
-                    <img id="cameraFeed" src="{% url 'robot_control:camera_feed' %}" class="camera-feed" alt="Kamera Görüntüsü">
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="text-center mb-4">Modem WiFi Sinyal Kalitesi Testi</h2>
+                            <form id="testForm" class="needs-validation" novalidate>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="modemBrand" class="form-label">Modem Markası</label>
+                                        <select class="form-select" id="modemBrand" required>
+                                            <option value="">Marka Seçin</option>
+                                            <option value="tp-link">TP-Link</option>
+                                            <option value="asus">ASUS</option>
+                                            <option value="netgear">Netgear</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Lütfen bir marka seçin
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="modemModel" class="form-label">Modem Modeli</label>
+                                        <select class="form-select" id="modemModel" required>
+                                            <option value="">Model Seçin</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Lütfen bir model seçin
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="firmware" class="form-label">Firmware Versiyonu</label>
+                                        <input type="text" class="form-control" id="firmware" required>
+                                        <div class="invalid-feedback">
+                                            Lütfen firmware versiyonunu girin
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="testType" class="form-label">Test Türü</label>
+                                        <select class="form-select" id="testType" required>
+                                            <option value="signal-strength">Sinyal Gücü</option>
+                                            <option value="connection-stability">Bağlantı Kararlılığı</option>
+                                            <option value="throughput">Veri Aktarım Hızı</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Lütfen bir test türü seçin
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-play me-2"></i>Testi Başlat
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Uzaktan Kontrol Bölümü -->
         <div id="teleop" class="content-section">
-            <h2>Uzaktan Kontrol</h2>
+            <h2>Manuel Kontrol</h2>
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Robot Kontrolleri</h5>
-                            <div class="mb-3">
-                                <p class="text-muted">
-                                    İleri/Geri: ±0.22 m/s<br>
-                                    Sol/Sağ: ±2.84 rad/s
-                                </p>
-                            </div>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-primary" id="forward">İleri</button>
+                                <button class="btn btn-primary btn-lg" id="forward">
+                                    <i class="fas fa-arrow-up"></i> İleri
+                                </button>
                                 <div class="d-flex justify-content-center gap-2">
-                                    <button class="btn btn-primary flex-grow-1" id="left">Sol</button>
-                                    <button class="btn btn-primary flex-grow-1" id="right">Sağ</button>
+                                    <button class="btn btn-primary btn-lg flex-grow-1" id="left">
+                                        <i class="fas fa-arrow-left"></i> Sol
+                                    </button>
+                                    <button class="btn btn-primary btn-lg flex-grow-1" id="right">
+                                        <i class="fas fa-arrow-right"></i> Sağ
+                                    </button>
                                 </div>
-                                <button class="btn btn-primary" id="backward">Geri</button>
-                                <button class="btn btn-danger" id="stop">Dur</button>
+                                <button class="btn btn-primary btn-lg" id="backward">
+                                    <i class="fas fa-arrow-down"></i> Geri
+                                </button>
+                                <button class="btn btn-danger btn-lg" id="stop">
+                                    <i class="fas fa-stop"></i> Dur
+                                </button>
                             </div>
-                            <div class="mt-3">
-                                <p class="mb-1">Mevcut Hızlar:</p>
-                                <p class="mb-1">Doğrusal Hız: <span id="currentLinearVel">0.00</span> m/s</p>
-                                <p class="mb-1">Açısal Hız: <span id="currentAngularVel">0.00</span> rad/s</p>
+                            <div class="mt-4">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="text-center p-2 border rounded">
+                                            <small class="text-muted d-block">Doğrusal Hız</small>
+                                            <span id="currentLinearVel" class="h5 mb-0">0.00</span>
+                                            <small class="text-muted d-block">m/s</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center p-2 border rounded">
+                                            <small class="text-muted d-block">Açısal Hız</small>
+                                            <span id="currentAngularVel" class="h5 mb-0">0.00</span>
+                                            <small class="text-muted d-block">rad/s</small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Kamera Görüntüsü</h5>
+                            <img id="cameraFeed" src="{% url 'robot_control:camera_feed' %}" class="camera-feed" alt="Kamera Görüntüsü">
                         </div>
                     </div>
                 </div>
@@ -129,20 +322,80 @@
 
         <!-- Ham Veri Bölümü -->
         <div id="raw-data" class="content-section">
-            <h2>Ham Veri</h2>
-            <p>Ham veri görselleştirmesi burada gösterilecektir.</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">IMU Verileri</h5>
+                            <p class="card-text">IMU sensöründen gelen ham veriler</p>
+                            <pre id="imuData" class="bg-light p-3 rounded">-</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Eklem Durumları</h5>
+                            <p class="card-text">Robot eklemlerinin durumları</p>
+                            <pre id="jointStates" class="bg-light p-3 rounded">-</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">TF Bilgileri</h5>
+                            <p class="card-text">Koordinat dönüşüm bilgileri</p>
+                            <pre id="tfData" class="bg-light p-3 rounded">-</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Raporlar Bölümü -->
         <div id="reports" class="content-section">
             <h2>Raporlar</h2>
-            <p>Test raporları ve analizleri burada gösterilecektir.</p>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Test Raporları</h5>
+                            <div class="mb-3">
+                                <p class="text-muted">Test raporları ve analizleri burada gösterilecektir.</p>
+                            </div>
+                            <div id="reportsList">
+                                <p>Henüz rapor bulunmamaktadır.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Hakkında Bölümü -->
         <div id="about" class="content-section">
             <h2>Hakkında</h2>
-            <p>Robot kontrol sistemi hakkında bilgiler burada gösterilecektir.</p>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Robot Kontrol Sistemi</h5>
+                            <p>Bu sistem, ROS2 tabanlı robotları web arayüzü üzerinden kontrol etmek için geliştirilmiştir.</p>
+                            <h6>Özellikler:</h6>
+                            <ul>
+                                <li>Web tabanlı robot kontrol arayüzü</li>
+                                <li>ROS2 entegrasyonu</li>
+                                <li>Gerçek zamanlı veri akışı</li>
+                                <li>Responsive tasarım</li>
+                                <li>WebSocket desteği</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -153,24 +406,41 @@
             const navLinks = document.querySelectorAll('.nav-link');
             const sections = document.querySelectorAll('.content-section');
 
+            function showSection(sectionId) {
+                // Tüm bölümleri gizle
+                sections.forEach(section => {
+                    section.classList.remove('active-section');
+                });
+                
+                // Tüm nav linklerinden active class'ını kaldır
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Seçilen bölümü göster
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active-section');
+                }
+                
+                // Seçilen nav link'e active class'ı ekle
+                const activeLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            // Her nav link için click event listener ekle
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     const targetSection = this.getAttribute('data-section');
-                    
-                    // Aktif nav link'i güncelle
-                    navLinks.forEach(navLink => navLink.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Hedef bölümü göster
-                    sections.forEach(section => {
-                        section.classList.remove('active-section');
-                        if (section.id === targetSection) {
-                            section.classList.add('active-section');
-                        }
-                    });
+                    showSection(targetSection);
                 });
             });
+
+            // Sayfa yüklendiğinde varsayılan olarak home sekmesini göster
+            showSection('home');
 
             // Uzaktan kontrol butonları
             const controlButtons = ['forward', 'backward', 'left', 'right', 'stop'];
@@ -179,29 +449,28 @@
                 if (button) {
                     button.addEventListener('click', function() {
                         // Sunucuya komut gönder
-                        let url;
+                        let command;
                         if (buttonId === 'forward') {
-                            url = "{% url 'robot_control:move_forward' %}";
+                            command = 'forward';
                         } else if (buttonId === 'backward') {
-                            url = "{% url 'robot_control:move_backward' %}";
+                            command = 'backward';
                         } else if (buttonId === 'left') {
-                            url = "{% url 'robot_control:turn_left' %}";
+                            command = 'left';
                         } else if (buttonId === 'right') {
-                            url = "{% url 'robot_control:turn_right' %}";
+                            command = 'right';
                         } else if (buttonId === 'stop') {
-                            url = "{% url 'robot_control:stop' %}";
+                            command = 'stop';
                         }
-
-                        fetch(url, {
-                            method: 'GET',
+                        fetch("{% url 'robot_control:send_command' %}", {
+                            method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
-                            }
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `command=${command}`
                         })
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === 'success') {
-                                // Hız bilgilerini güncelle
                                 document.getElementById('currentLinearVel').textContent = 
                                     data.linear_velocity.toFixed(2);
                                 document.getElementById('currentAngularVel').textContent = 
@@ -235,8 +504,6 @@
                         console.error('Hız bilgisi alınamadı:', error);
                     });
             }
-            
-            // Her 500ms'de bir hız bilgilerini güncelle
             setInterval(updateVelocityInfo, 500);
 
             // Kamera görüntüsünü periyodik olarak güncelle
@@ -245,16 +512,12 @@
                 if (cameraFeed) {
                     const timestamp = new Date().getTime();
                     cameraFeed.src = "{% url 'robot_control:camera_feed' %}?t=" + timestamp;
-                    
-                    // Hata durumunda görüntüyü yeniden yükle
                     cameraFeed.onerror = function() {
                         console.error('Kamera görüntüsü yüklenemedi');
-                        setTimeout(updateCameraFeed, 1000); // 1 saniye sonra tekrar dene
+                        setTimeout(updateCameraFeed, 1000);
                     };
                 }
             }
-            
-            // İlk yüklemede ve her 100ms'de bir güncelle
             updateCameraFeed();
             setInterval(updateCameraFeed, 100);
 
@@ -263,7 +526,6 @@
             if (testForm) {
                 testForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    // Handle test form submission
                     const formData = {
                         brand: document.getElementById('modemBrand').value,
                         model: document.getElementById('modemModel').value,
@@ -273,6 +535,110 @@
                     console.log('Test başlatıldı:', formData);
                 });
             }
+
+            // Ham veri güncelleme fonksiyonu
+            function updateRawData() {
+                fetch("{% url 'robot_control:get_raw_data' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // IMU verilerini güncelle
+                            if (data.imu_data) {
+                                document.getElementById('imuData').textContent = 
+                                    JSON.stringify(data.imu_data, null, 2);
+                            } else {
+                                document.getElementById('imuData').textContent = '-';
+                            }
+
+                            // Eklem durumlarını güncelle
+                            if (data.joint_states) {
+                                const jointStates = data.joint_states;
+                                let htmlContent = '<table class="table table-sm">';
+                                htmlContent += '<thead><tr><th>Eklem Adı</th><th>Hız (rad/s)</th></tr></thead>';
+                                htmlContent += '<tbody>';
+                                
+                                for (let i = 0; i < jointStates.names.length; i++) {
+                                    htmlContent += `<tr>
+                                        <td>${jointStates.names[i]}</td>
+                                        <td>${jointStates.velocities[i].toFixed(2)}</td>
+                                    </tr>`;
+                                }
+                                
+                                htmlContent += '</tbody></table>';
+                                document.getElementById('jointStates').innerHTML = htmlContent;
+                            } else {
+                                document.getElementById('jointStates').innerHTML = '<p class="text-muted">-</p>';
+                            }
+
+                            // TF verilerini güncelle
+                            if (data.tf_data) {
+                                document.getElementById('tfData').textContent = 
+                                    JSON.stringify(data.tf_data, null, 2);
+                            } else {
+                                document.getElementById('tfData').textContent = '-';
+                            }
+                        } else {
+                            console.error('Veri alınamadı:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Veri güncelleme hatası:', error);
+                    });
+            }
+
+            // Her saniye verileri güncelle
+            setInterval(updateRawData, 500);
+
+            // Sayfa yüklendiğinde ilk veriyi al
+            updateRawData();
+
+            // Form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+
+            // Robot durum bilgilerini güncelle
+            function updateRobotStatus() {
+                fetch("{% url 'robot_control:get_position' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Pil durumu (örnek değer)
+                            const batteryLevel = Math.floor(Math.random() * 100);
+                            document.getElementById('batteryStatus').innerHTML = 
+                                `${batteryLevel}% <small class="text-muted">(${batteryLevel > 20 ? 'Normal' : 'Düşük'})</small>`;
+                            
+                            // WiFi durumu (örnek değer)
+                            const wifiStrength = Math.floor(Math.random() * 100);
+                            let wifiStatus = 'Zayıf';
+                            if (wifiStrength > 80) wifiStatus = 'Mükemmel';
+                            else if (wifiStrength > 60) wifiStatus = 'İyi';
+                            else if (wifiStrength > 40) wifiStatus = 'Orta';
+                            document.getElementById('wifiStatus').innerHTML = 
+                                `${wifiStrength}% <small class="text-muted">(${wifiStatus})</small>`;
+                            
+                            // Robot durumu
+                            const isMoving = data.linear_velocity !== 0 || data.angular_velocity !== 0;
+                            document.getElementById('robotStatus').innerHTML = 
+                                isMoving ? 'Hareket Halinde' : 'Hazır';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Durum bilgisi alınamadı:', error);
+                    });
+            }
+
+            // Durum bilgilerini periyodik olarak güncelle
+            setInterval(updateRobotStatus, 2000);
+            updateRobotStatus(); // İlk yükleme
         });
     </script>
 </body>
